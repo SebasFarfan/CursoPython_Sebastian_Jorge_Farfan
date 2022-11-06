@@ -1,3 +1,5 @@
 venv
-db_biblioteca.sqlite3
+# db_biblioteca.sqlite3
 __pycache__
+
+.vscode/
