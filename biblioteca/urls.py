@@ -32,6 +32,16 @@ urlpatterns = [
     path('books/', BookView.as_view(), name='books'),
     path('books/<int:author_id>', BookView.as_view(), name='books'),
     path('books/update/<int:book_id>', BookView.as_view(), name='update_book'),
-    path('books/delete/<int:book_id>', BookView.as_view(), name='delete_book')
+    path('books/delete/<int:book_id>', BookView.as_view(), name='delete_book'),
+    
+    path('partner/', PartnerView.as_view(), name='partner'),
+    path('partner/<str:dni>', PartnerView.as_view(), name='partner'),
+    path('partner/update/<int:partner_id>', PartnerView.as_view(), name='update_partner'),
+    path('partner/delete/<int:partner_id>', PartnerView.as_view(), name='delete_partner'),
+    
+    path('bookloan/', BookLoanView.as_view(), name='bookloan'),
+    path('bookloan/dni/<str:dni>', BookLoanView.as_view(), name='bookloan'),
+    path('bookloan/status/<str:status>', BookLoanView.as_view(), name='bookloan'),
+    path('bookloan/update/<int:bookLoan_id>', BookLoanView.as_view(), name='update_bookLoan'),
     
 ]

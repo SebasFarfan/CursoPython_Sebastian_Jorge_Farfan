@@ -129,3 +129,87 @@ class BookView(APIView):
             return HttpResponse(content_type='application/json', content=json.dumps({'detail': 'Book not found'}), status=HTTP_404_NOT_FOUND)
         book.delete()
         return HttpResponse(content_type='application/json', content=json.dumps({'detail': 'Book deleted'}), status=HTTP_200_OK)
+
+class PartnerView(APIView):
+    def post(self, request):
+        body = json.loads(request.body)
+        partner, created = Partner.objects.get_or_create(**body)
+        if created:
+            partner.save()
+            return HttpResponse(content_type='application/json', content=json.dumps({'detail': 'Partner created'}), status=HTTP_201_CREATED)
+        return HttpResponse(content_type='application/json', content=json.dumps({'detail':'Partner is already exists'}), status=HTTP_409_CONFLICT)
+    
+    def put(self,request,partner_id):
+        partner=Partner.objects.filter(pk=partner_id)
+        if not partner.exists():
+            return HttpResponse(content_type='application/json', content=json.dumps({'detail': 'Partner not found'}), status=HTTP_404_NOT_FOUND)
+        body = json.loads(request.body)
+        body['last_update']=datetime.now()
+        partner.update(**body)
+        return HttpResponse(content_type='application/json', content=json.dumps({'detail':'Partner updated'}), status=HTTP_200_OK)
+    
+    def delete(self,request,partner_id):
+        partner=Partner.objects.filter(pk=partner_id)
+        if not partner.exists():
+            return HttpResponse(content_type='application/json', content=json.dumps({'detail': 'Partner not found'}), status=HTTP_404_NOT_FOUND)
+        partner.delete()
+        return HttpResponse(content_type='application/json', content=json.dumps({'detail': 'Partner deleted'}), status=HTTP_200_OK)
+
+    def get(self,request,dni=None):
+        if dni:
+            if Partner.objects.filter(dni__exact=dni).exists():
+                partner_response = Partner.objects.filter(dni__exact=dni)
+            else:
+                return HttpResponse(content_type='application/json', content=json.dumps({'detail':'Partner not found'}), status=HTTP_404_NOT_FOUND)
+        else:
+            partner_response=Partner.objects.all()
+        
+        partner_response=serialize('json', partner_response)
+        return HttpResponse(content_type='application/json', content=partner_response, status=HTTP_200_OK)
+    
+class BookLoanView(APIView):
+    def post(self,request):
+        body= json.loads(request.body)
+        body['partner']=Partner.objects.get(pk=body['partner'])
+        body['book']=Book.objects.get(pk=body['book'])
+        
+        bookLoan, created = BookLoan.objects.get_or_create(**body)
+        
+        if created:
+            bookLoan.save()
+            return HttpResponse(content_type='application/json', content=json.dumps({'detail':'BookLoan created'}), status=HTTP_201_CREATED)
+        return HttpResponse(content_type='application/json', content=json.dumps({'detail':'BookLoan is already exists'}), status=HTTP_409_CONFLICT)
+    
+    def put(self,request,bookLoan_id):
+        bookLoan=BookLoan.objects.filter(pk=bookLoan_id)
+        if not bookLoan.exists():
+            return HttpResponse(content_type='application/json', content=json.dumps({'detail':'BookLoan does not found'}), status=HTTP_404_NOT_FOUND)
+        body = json.loads(request.body)
+        body['last_update']=datetime.now()
+        body['status']= 'terminado'
+        bookLoan.update(**body)
+        return HttpResponse(content_type='application/json', content=json.dumps({'detail': 'BookLoan updated'}), status=HTTP_200_OK)
+    
+    def get(self,request,dni=None,status=None):
+        partner_id = 0        
+        if dni:
+            if Partner.objects.filter(dni__exact=dni).exists():
+                partner_id = Partner.objects.get(dni__exact=dni).pk
+                if BookLoan.objects.filter(partner=partner_id).exists():
+                    bookLoan_response = BookLoan.objects.filter(partner=partner_id)
+                else:
+                    return HttpResponse(content_type='application/json',content=json.dumps({'detail':'BookLoan not found'}), status=HTTP_404_NOT_FOUND)
+            else:
+                return HttpResponse(content_type='application/json', content=json.dumps({'detail':'Partner not found'}), status=HTTP_404_NOT_FOUND)
+        elif status:
+            if BookLoan.objects.filter(status__iexact=status).exists():
+                bookLoan_response = BookLoan.objects.filter(status__iexact=status)
+            else:
+                return HttpResponse(content_type='application/json', content=json.dumps({'detail':'BookLoan not found'}), status=HTTP_404_NOT_FOUND)
+        else:
+            bookLoan_response = BookLoan.objects.all()
+        
+        bookLoan_response = serialize('json',bookLoan_response)
+        return HttpResponse(content_type='application/json', content=bookLoan_response, status=HTTP_200_OK)
+    
+    
