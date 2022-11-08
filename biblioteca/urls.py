@@ -29,4 +29,9 @@ urlpatterns = [
     path('categories/update/<int:category_id>', CategoryView.as_view(), name='update_category'),
     path('categories/delete/<int:category_id>', CategoryView.as_view(),name='delete_category'),
     
+    path('books/', BookView.as_view(), name='books'),
+    path('books/<int:author_id>', BookView.as_view(), name='books'),
+    path('books/update/<int:book_id>', BookView.as_view(), name='update_book'),
+    path('books/delete/<int:book_id>', BookView.as_view(), name='delete_book')
+    
 ]
